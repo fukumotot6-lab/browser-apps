@@ -30,6 +30,14 @@ const COMMAND_RULES = [
     reason: '強制プッシュは人間の承認が必要です。',
   },
   {
+    pattern: /\bgit\s+push\b.*\bmain\b/,
+    reason: 'mainブランチへのプッシュは人間の承認が必要です。',
+  },
+  {
+    pattern: /\bgit\s+push\b|\bgh\s+pr\s+create\b/,
+    reason: 'プッシュとPRの作成は公開される操作です。人間の承認が必要です。',
+  },
+  {
     pattern:
       /\bgit\s+(reset\s+--hard|clean\b|checkout\s+(--|\.)|restore\b(?!.*--staged)|rebase\b|filter-branch|filter-repo|commit\b.*--amend)/,
     reason:
@@ -40,18 +48,16 @@ const COMMAND_RULES = [
     reason: 'マージは人間が行います。',
   },
   {
-    pattern: /\bgit\s+push\b.*\bmain\b/,
-    reason: 'mainブランチへのプッシュは人間の承認が必要です。',
-  },
-  {
     pattern:
       /\bgh\s+(repo\s+(edit|delete|rename|archive)|secret\b|variable\b|ruleset\b|workflow\s+(enable|disable|run)|api\b.*(-X|--method)[\s=]*(POST|PUT|PATCH|DELETE))/i,
     reason: 'リポジトリ設定の変更は、手順を示して人間に依頼します。',
   },
   {
+    // 未追跡のファイルは削除すると元に戻せないので、1ファイルの削除でも確認する。
     pattern:
-      /\brm\s+(-\w*[rR]\w*|--recursive)\b|\bRemove-Item\b.*-Recurse|\b(rmdir|rd|del)\s+\/s\b/i,
-    reason: 'ディレクトリごと削除する操作です。対象を確認してください。',
+      /(^|[\s;&|(])(rm|rmdir|rd|del|erase|unlink|Remove-Item|ri)\s|\bgit\s+rm\b/i,
+    reason:
+      'ファイルまたはディレクトリを削除する操作です。対象を確認してください。',
   },
   {
     pattern: /\bnpm\s+audit\s+fix\b/,
