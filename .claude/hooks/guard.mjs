@@ -48,8 +48,13 @@ const COMMAND_RULES = [
     reason: 'マージは人間が行います。',
   },
   {
+    pattern: /\bgh\s+pr\s+(review\b.*(--approve|\s-a\b)|close\b)/,
+    reason: 'PRの承認と、PRを閉じる判断は人間が行います。',
+  },
+  {
+    // PRのコメントへの返信はAPIへの書き込みだが、リポジトリ設定の変更ではないので対象から外す。
     pattern:
-      /\bgh\s+(repo\s+(edit|delete|rename|archive)|secret\b|variable\b|ruleset\b|workflow\s+(enable|disable|run)|api\b.*(-X|--method)[\s=]*(POST|PUT|PATCH|DELETE))/i,
+      /\bgh\s+(repo\s+(edit|delete|rename|archive)|secret\b|variable\b|ruleset\b|workflow\s+(enable|disable|run)|api\b(?!.*\/(pulls|issues)\/(comments\/)?\d+\/(comments|replies)\b).*(-X|--method)[\s=]*(POST|PUT|PATCH|DELETE))/i,
     reason: 'リポジトリ設定の変更は、手順を示して人間に依頼します。',
   },
   {
