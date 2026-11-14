@@ -1,0 +1,10 @@
+version: 2
+updates:
+  # ワークフローで使うアクションはコミットSHAで固定しているため、自動では新しくならない。
+  # 新しい版が出たときに、SHAを書き換えるPRを受け取る。
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: ci
