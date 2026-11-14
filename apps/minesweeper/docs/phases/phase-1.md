@@ -22,7 +22,7 @@
 | `npm run format:check` | 成功                     |
 | `npm run lint`         | 成功                     |
 | `npm run typecheck`    | 成功                     |
-| `npm test`             | 成功（5ファイル、136件） |
+| `npm test`             | 成功（5ファイル、139件） |
 | `npm run build`        | 成功                     |
 
 確認していないことは次のとおりです。
