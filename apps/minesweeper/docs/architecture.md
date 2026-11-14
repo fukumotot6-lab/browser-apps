@@ -45,14 +45,15 @@ apps/minesweeper/
 
 ゲームの状態は `GameState` という1つの値で表します。操作は、状態を受け取って新しい状態を返す関数です。
 
-| 関数                                    | 役割                                  |
-| --------------------------------------- | ------------------------------------- |
-| `createGame(config)`                    | 新しいゲームを作る                    |
-| `openCell(state, position, placeMines)` | マスを開く                            |
-| `toggleFlag(state, position)`           | 旗を立てる・外す                      |
-| `countRemainingMines(state)`            | 残り機雷数（機雷数 − 旗の数）を求める |
-| `getCellView(state, position)`          | 1つのマスを画面にどう見せるかを求める |
-| `createRandomMinePlacer(random)`        | 乱数から、機雷を配置する関数を作る    |
+| 関数                                    | 役割                                       |
+| --------------------------------------- | ------------------------------------------ |
+| `createGame(config)`                    | 新しいゲームを作る                         |
+| `openCell(state, position, placeMines)` | マスを開く                                 |
+| `openNeighbours(state, position)`       | 開いている数字のマスの周囲を、まとめて開く |
+| `toggleFlag(state, position)`           | 旗を立てる・外す                           |
+| `countRemainingMines(state)`            | 残り機雷数（機雷数 − 旗の数）を求める      |
+| `getCellView(state, position)`          | 1つのマスを画面にどう見せるかを求める      |
+| `createRandomMinePlacer(random)`        | 乱数から、機雷を配置する関数を作る         |
 
 - **渡された状態を書き換えません**。操作のたびに新しい状態を返します。前後の状態を比べられるので、テストが書きやすくなります
 - **何も変わらない操作では、渡された状態をそのまま返します**。描画層は、返ってきた状態が同じものかどうかを見るだけで、描き直しを省けます
