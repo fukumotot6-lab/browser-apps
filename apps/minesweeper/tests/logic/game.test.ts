@@ -3,6 +3,7 @@ import {
   countRemainingMines,
   createGame,
   openCell,
+  openNeighbours,
   toggleFlag,
 } from '../../src/logic/game';
 import type {
@@ -125,7 +126,7 @@ describe('createGame', () => {
     { label: '機雷数が小数', width: 3, height: 3, mineCount: 1.5 },
     { label: '機雷数がマスの数と同じ', width: 3, height: 3, mineCount: 9 },
     { label: '機雷数がマスの数より多い', width: 3, height: 3, mineCount: 10 },
-  ])('$labelの設定ではエラーになる', ({ width, height, mineCount }) => {
+  ])('不正な設定（$label）ではエラーになる', ({ width, height, mineCount }) => {
     expect(() => createGame({ width, height, mineCount })).toThrow();
   });
 
@@ -570,7 +571,7 @@ describe('難易度3種類の大きさでの通しプレイ', () => {
     { label: '中級（16×16・機雷40）', width: 16, height: 16, mineCount: 40 },
     { label: '上級（30×16・機雷99）', width: 30, height: 16, mineCount: 99 },
   ])(
-    '$labelで機雷のないマスをすべて開くと勝ちになる',
+    '$label：機雷のないマスをすべて開くと勝ちになる',
     ({ width, height, mineCount }) => {
       const config = { width, height, mineCount };
       const mines = new Set(spreadPlacer(config, 0));
@@ -626,5 +627,159 @@ describe('fixedPlacerで位置を指定した場合', () => {
     expect(state.cells.filter((cell) => cell.hasMine)).toHaveLength(2);
     // (2,1)の周囲には(1,2)の機雷だけがある。(4,0)は2マス離れている。
     expect(render(state)).toEqual(['#####', '##1##', '#####']);
+  });
+});
+
+describe('openNeighbours（数字のマスの周囲をまとめて開く）', () => {
+  // 中央の(1,1)は、左上と右下の機雷に接する「2」。
+  const board = boardFrom(['*...', '....', '..*.']);
+
+  /** (1,1)だけを開いた状態。周囲はすべて閉じている。 */
+  function centreOpened(): GameState {
+    return openCell(createGame(board.config), { x: 1, y: 1 }, board.placeMines);
+  }
+
+  function flagAll(state: GameState, positions: readonly Position[]) {
+    return positions.reduce(toggleFlag, state);
+  }
+
+  it('周囲の旗の数が数字と一致すると、旗のない閉じたマスがすべて開き、空白はさらに広がる', () => {
+    const flagged = flagAll(centreOpened(), [
+      { x: 0, y: 0 },
+      { x: 2, y: 2 },
+    ]);
+
+    const state = openNeighbours(flagged, { x: 1, y: 1 });
+
+    // 右下の(3,2)は(1,1)の隣ではなく、空白にも接していないので閉じたまま。
+    expect(render(state)).toEqual(['F100', '1211', '01F#']);
+    expect(state.status).toBe('playing');
+  });
+
+  it.each([
+    { label: '旗がない', flags: [] },
+    { label: '旗が数字より少ない', flags: [{ x: 0, y: 0 }] },
+    {
+      label: '旗が数字より多い',
+      flags: [
+        { x: 0, y: 0 },
+        { x: 2, y: 2 },
+        { x: 1, y: 0 },
+      ],
+    },
+  ])(
+    '旗の数が合わない（$label）ときは何も開かず、同じ状態を返す',
+    ({ flags }) => {
+      const flagged = flagAll(centreOpened(), flags);
+
+      expect(openNeighbours(flagged, { x: 1, y: 1 })).toBe(flagged);
+    },
+  );
+
+  it('旗の位置が間違っていると機雷を開いて負けになる', () => {
+    const flagged = flagAll(centreOpened(), [
+      { x: 0, y: 0 },
+      { x: 1, y: 0 },
+    ]);
+
+    const state = openNeighbours(flagged, { x: 1, y: 1 });
+
+    expect(state.status).toBe('lost');
+    expect(state.explodedIndex).toBe(2 * 4 + 2);
+    // 負けたときは機雷のマスだけが開き、機雷のないマスは開かない。
+    expect(render(state)).toEqual(['FF##', '#2##', '##*#']);
+  });
+
+  it('複数の機雷を開くことになっても、負けの原因として記録するのは添字の小さい1つだけ', () => {
+    const twoMines = boardFrom(['.*.', '...', '.*.']);
+    const opened = openCell(
+      createGame(twoMines.config),
+      { x: 1, y: 1 },
+      twoMines.placeMines,
+    );
+    const flagged = flagAll(opened, [
+      { x: 0, y: 0 },
+      { x: 2, y: 2 },
+    ]);
+
+    const state = openNeighbours(flagged, { x: 1, y: 1 });
+
+    expect(state.status).toBe('lost');
+    expect(state.explodedIndex).toBe(1);
+    expect(render(state)).toEqual(['F*#', '#2#', '##F']);
+  });
+
+  it('周囲を開いた結果、機雷のないマスがすべて開けば勝ちになる', () => {
+    const small = boardFrom(['*.', '..']);
+    const opened = openCell(
+      createGame(small.config),
+      { x: 1, y: 1 },
+      small.placeMines,
+    );
+    const flagged = toggleFlag(opened, { x: 0, y: 0 });
+
+    const state = openNeighbours(flagged, { x: 1, y: 1 });
+
+    expect(state.status).toBe('won');
+    expect(render(state)).toEqual(['F1', '11']);
+    expect(countRemainingMines(state)).toBe(0);
+  });
+
+  it('閉じたマスや旗のマスに対しては何もせず、同じ状態を返す', () => {
+    const flagged = toggleFlag(centreOpened(), { x: 0, y: 0 });
+
+    expect(openNeighbours(flagged, { x: 3, y: 0 })).toBe(flagged);
+    expect(openNeighbours(flagged, { x: 0, y: 0 })).toBe(flagged);
+  });
+
+  it('最初のマスを開く前は何もせず、同じ状態を返す', () => {
+    const ready = createGame(board.config);
+
+    expect(openNeighbours(ready, { x: 1, y: 1 })).toBe(ready);
+  });
+
+  it('周囲に開けるマスが残っていなければ、同じ状態を返す', () => {
+    const flagged = flagAll(centreOpened(), [
+      { x: 0, y: 0 },
+      { x: 2, y: 2 },
+    ]);
+    const opened = openNeighbours(flagged, { x: 1, y: 1 });
+
+    expect(openNeighbours(opened, { x: 1, y: 1 })).toBe(opened);
+  });
+
+  it('勝敗が決まったあとは何もせず、同じ状態を返す', () => {
+    const lost = openNeighbours(
+      flagAll(centreOpened(), [
+        { x: 0, y: 0 },
+        { x: 1, y: 0 },
+      ]),
+      { x: 1, y: 1 },
+    );
+
+    expect(openNeighbours(lost, { x: 1, y: 1 })).toBe(lost);
+  });
+
+  it('渡された状態を書き換えない', () => {
+    const flagged = deepFreeze(
+      flagAll(centreOpened(), [
+        { x: 0, y: 0 },
+        { x: 2, y: 2 },
+      ]),
+    );
+    const before = JSON.stringify(flagged);
+
+    const state = openNeighbours(flagged, { x: 1, y: 1 });
+
+    expect(state).not.toBe(flagged);
+    expect(JSON.stringify(flagged)).toBe(before);
+  });
+
+  it.each([
+    { label: 'xが負', x: -1, y: 0 },
+    { label: 'yが高さと同じ', x: 0, y: 3 },
+    { label: 'xが小数', x: 0.5, y: 0 },
+  ])('盤面の外や整数でない位置（$label）ではエラーになる', ({ x, y }) => {
+    expect(() => openNeighbours(centreOpened(), { x, y })).toThrow();
   });
 });

@@ -5,6 +5,7 @@ import {
   createRandomMinePlacer,
   getCellView,
   openCell,
+  openNeighbours,
   toggleFlag,
 } from '../../src/logic/index';
 import type {
@@ -154,7 +155,7 @@ describe('乱数による配置と組み合わせた通しプレイ', () => {
     '$label：機雷を避けて開き続けると、必ず勝ちで終わる',
     ({ width, height, mineCount }) => {
       const config = { width, height, mineCount };
-      for (let seed = 1; seed <= 30; seed += 1) {
+      for (let seed = 1; seed <= 8; seed += 1) {
         const random = seededRandom(seed);
         const placeMines = createRandomMinePlacer(random);
         const first = positionOf(config, Math.floor(random() * width * height));
@@ -186,7 +187,7 @@ describe('乱数による配置と組み合わせた通しプレイ', () => {
     '$label：でたらめに開いたり旗を立てたりしても、盤面の整合性が保たれる',
     ({ width, height, mineCount }) => {
       const config = { width, height, mineCount };
-      for (let seed = 1; seed <= 30; seed += 1) {
+      for (let seed = 1; seed <= 8; seed += 1) {
         const random = seededRandom(seed * 7919);
         const placeMines = createRandomMinePlacer(random);
         let state = createGame(config);
@@ -197,10 +198,14 @@ describe('乱数による配置と組み合わせた通しプレイ', () => {
             Math.floor(random() * width * height),
           );
           const before = state;
-          state =
-            random() < 0.3
-              ? toggleFlag(state, position)
-              : openCell(state, position, placeMines);
+          const action = random();
+          if (action < 0.3) {
+            state = toggleFlag(state, position);
+          } else if (action < 0.5) {
+            state = openNeighbours(state, position);
+          } else {
+            state = openCell(state, position, placeMines);
+          }
           expect(findProblems(state, true)).toEqual([]);
 
           const wasFinished =

@@ -79,21 +79,60 @@ export function openCell(
     };
   }
 
-  const openedCells = floodOpen(state.config, cells, index);
-  const isWon = openedCells.every(
-    (current) => current.hasMine || current.state === 'open',
-  );
-  if (!isWon) {
-    return { ...state, status: 'playing', cells: openedCells };
+  return afterOpening(state, floodOpen(state.config, cells, index));
+}
+
+/**
+ * 開いている数字のマスの周囲を、まとめて開く（昔のWindows版の両クリックにあたる操作）。
+ *
+ * 周囲の旗の数がそのマスの数字と一致するときだけ、旗のない閉じたマスをすべて開く。
+ * 旗の位置が間違っていれば機雷を開くことになり、負けになる。
+ * 一致しないときに何もしないのは、利用者がまだ機雷の位置を特定し終えていないため。
+ */
+export function openNeighbours(
+  state: GameState,
+  position: Position,
+): GameState {
+  const { index, cell } = findCell(state, position);
+  if (isFinished(state) || cell.state !== 'open') {
+    return state;
   }
-  return {
-    ...state,
-    status: 'won',
-    // 勝ったときは残りの機雷に旗を立て、残り機雷数のカウンターが0になるようにする。
-    cells: openedCells.map((current) =>
-      current.hasMine ? { ...current, state: 'flagged' } : current,
-    ),
-  };
+
+  const neighbours = neighbourIndices(state.config, index);
+  const flagCount = neighbours.filter(
+    (neighbour) => cellAt(state.cells, neighbour).state === 'flagged',
+  ).length;
+  const targets = neighbours.filter(
+    (neighbour) => cellAt(state.cells, neighbour).state === 'hidden',
+  );
+  if (flagCount !== cell.adjacentMines || targets.length === 0) {
+    return state;
+  }
+
+  const mineIndex = targets.find(
+    (target) => cellAt(state.cells, target).hasMine,
+  );
+  if (mineIndex !== undefined) {
+    // 複数の機雷を同時に開くことになっても、負けの原因として記録するのは1つだけにする。
+    // 残りはgetCellViewが「明かされた機雷」として見せる。
+    const lostCells = [...state.cells];
+    lostCells[mineIndex] = { ...cellAt(lostCells, mineIndex), state: 'open' };
+    return {
+      ...state,
+      status: 'lost',
+      cells: lostCells,
+      explodedIndex: mineIndex,
+    };
+  }
+
+  let cells = state.cells;
+  for (const target of targets) {
+    // 先に開いたマスからの広がりで、すでに開いていることがある。
+    if (cellAt(cells, target).state === 'hidden') {
+      cells = floodOpen(state.config, cells, target);
+    }
+  }
+  return afterOpening(state, cells);
 }
 
 /** 旗を立てる・外す。旗の数に上限は設けない（残り機雷数は負になりうる）。 */
@@ -143,6 +182,24 @@ export function findCell(
   }
   const index = y * width + x;
   return { index, cell: cellAt(state.cells, index) };
+}
+
+/** 機雷のないマスを開いたあとの状態を作る。すべて開いていれば勝ちにする。 */
+function afterOpening(state: GameState, cells: readonly Cell[]): GameState {
+  const isWon = cells.every(
+    (current) => current.hasMine || current.state === 'open',
+  );
+  if (!isWon) {
+    return { ...state, status: 'playing', cells };
+  }
+  return {
+    ...state,
+    status: 'won',
+    // 勝ったときは残りの機雷に旗を立て、残り機雷数のカウンターが0になるようにする。
+    cells: cells.map((current) =>
+      current.hasMine ? { ...current, state: 'flagged' } : current,
+    ),
+  };
 }
 
 function isFinished(state: GameState): boolean {
