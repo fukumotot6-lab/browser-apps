@@ -232,4 +232,51 @@ describe('乱数による配置と組み合わせた通しプレイ', () => {
       }
     },
   );
+
+  // でたらめな操作では、旗の数が数字と一致することがほとんどなく、周囲を開く操作が
+  // 実際には何も開かないまま終わる。ここでは正しい位置に旗を立てて、確実に働かせる。
+  it.each(DIFFICULTIES)(
+    '$label：正しい位置に旗を立てて周囲を開く操作を繰り返しても、負けずに盤面の整合性が保たれる',
+    ({ width, height, mineCount }) => {
+      const config = { width, height, mineCount };
+      for (let seed = 1; seed <= 8; seed += 1) {
+        const random = seededRandom(seed * 104729);
+        const placeMines = createRandomMinePlacer(random);
+        const first = positionOf(config, Math.floor(random() * width * height));
+        let state = openCell(createGame(config), first, placeMines);
+        let openedCount = 0;
+
+        let hasChanged = true;
+        while (hasChanged && state.status === 'playing') {
+          hasChanged = false;
+          for (let index = 0; index < width * height; index += 1) {
+            const position = positionOf(config, index);
+            if (
+              state.status !== 'playing' ||
+              cellOf(state, position).state !== 'open'
+            ) {
+              continue;
+            }
+            for (const p of neighbours(config, position)) {
+              const cell = cellOf(state, p);
+              if (cell.hasMine && cell.state === 'hidden') {
+                state = toggleFlag(state, p);
+              }
+            }
+
+            const before = state;
+            state = openNeighbours(state, position);
+            if (state !== before) {
+              hasChanged = true;
+              openedCount += 1;
+              expect(findProblems(state, true)).toEqual([]);
+            }
+          }
+        }
+
+        expect(state.status).not.toBe('lost');
+        expect(openedCount).toBeGreaterThan(0);
+      }
+    },
+  );
 });
