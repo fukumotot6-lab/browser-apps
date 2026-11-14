@@ -8,7 +8,7 @@ export default tseslint.config(
   ...tseslint.configs.strict,
   {
     // ロジック層はNode.js上で単体テストできる状態を保つ（docs/conventions.md「層の分離」）。
-    files: ['apps/*/src/logic/**'],
+    files: ['apps/*/src/logic/**', 'apps/*/tests/logic/**'],
     rules: {
       'no-restricted-globals': [
         'error',
