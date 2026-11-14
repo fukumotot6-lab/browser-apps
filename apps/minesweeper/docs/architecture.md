@@ -10,13 +10,15 @@ apps/minesweeper/
   vite.config.ts      ビルドとテストの設定
   src/
     main.ts           ロジック層と描画層をつなぐ入口
-    logic/            ロジック層。テストは対象の隣に置く
+    logic/            ロジック層
       types.ts            型の定義
       mine-placement.ts   機雷の配置
       game.ts             ゲームの作成、マスを開く、旗、勝敗判定
       cell-view.ts        マスの見せ方への変換
       index.ts            描画層に公開するものの一覧
     ui/               描画層（段階2で作る）
+  tests/              テスト。src/ と同じ構成で置く
+    logic/            ロジック層のテスト
   docs/               このアプリの要件定義書、設計、段階レポート
 ```
 
