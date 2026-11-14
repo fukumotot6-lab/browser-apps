@@ -1,0 +1,9 @@
+dist/
+coverage/
+package-lock.json
+
+# 要件定義書の写しは原文のまま保つ
+apps/*/docs/requirements.md
+
+# リポジトリに入れないローカルの原本
+/requirements.md
