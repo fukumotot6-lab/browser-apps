@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { getCellView } from './cell-view';
-import { createGame, openCell, toggleFlag } from './game';
-import type { BoardConfig, CellView, GameState, MinePlacer } from './types';
+import { getCellView } from '../../src/logic/cell-view';
+import { createGame, openCell, toggleFlag } from '../../src/logic/game';
+import type {
+  BoardConfig,
+  CellView,
+  GameState,
+  MinePlacer,
+} from '../../src/logic/types';
 
 /** `*` が機雷、それ以外は機雷のないマス。 */
 function boardFrom(rows: readonly string[]): {

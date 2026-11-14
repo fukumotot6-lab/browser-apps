@@ -1,12 +1,17 @@
 import { describe, expect, it } from 'vitest';
-import { countRemainingMines, createGame, openCell, toggleFlag } from './game';
+import {
+  countRemainingMines,
+  createGame,
+  openCell,
+  toggleFlag,
+} from '../../src/logic/game';
 import type {
   BoardConfig,
   Cell,
   GameState,
   MinePlacer,
   Position,
-} from './types';
+} from '../../src/logic/types';
 
 interface Board {
   readonly config: BoardConfig;

@@ -6,6 +6,6 @@ export default defineConfig({
   test: {
     // ロジック層がDOMなしで動くことを保証するため、ブラウザ環境を模擬しない。
     environment: 'node',
-    include: ['src/**/*.test.ts'],
+    include: ['tests/**/*.test.ts'],
   },
 });

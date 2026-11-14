@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { createRandomMinePlacer } from './mine-placement';
-import type { BoardConfig, Random } from './types';
+import { createRandomMinePlacer } from '../../src/logic/mine-placement';
+import type { BoardConfig, Random } from '../../src/logic/types';
 
 /** 種から同じ列を再現できる乱数（mulberry32）。テストの結果を毎回同じにするために使う。 */
 function createSeededRandom(seed: number): Random {

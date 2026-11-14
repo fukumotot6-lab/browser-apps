@@ -6,8 +6,13 @@ import {
   getCellView,
   openCell,
   toggleFlag,
-} from './index';
-import type { BoardConfig, GameState, Position, Random } from './index';
+} from '../../src/logic/index';
+import type {
+  BoardConfig,
+  GameState,
+  Position,
+  Random,
+} from '../../src/logic/index';
 
 // 個々のモジュールのテストは、配置を手で固定して振る舞いを確かめている。
 // ここでは公開APIだけを使い、乱数による配置と組み合わせて、どんな盤面でも
