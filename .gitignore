@@ -1,0 +1,25 @@
+# 依存パッケージ
+node_modules/
+
+# ビルド成果物・テスト出力
+dist/
+coverage/
+*.tsbuildinfo
+
+# 秘密情報（このリポジトリには不要。誤って置いた場合の保険）
+.env
+.env.*
+
+# ログ
+*.log
+
+# エディタ・OSが作るファイル
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Claude Codeの端末固有設定
+.claude/settings.local.json
