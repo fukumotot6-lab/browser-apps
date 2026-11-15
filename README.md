@@ -25,8 +25,15 @@ npm run dev -w minesweeper
 npm run format:check   整形の確認
 npm run lint           Lint
 npm run typecheck      型チェック
-npm test               テスト
+npm test               単体テスト
 npm run build          ビルド
+npm run test:browser   ブラウザテスト（ビルドしてから、実際のブラウザ3種類で操作する）
+```
+
+ブラウザテストを初めて実行する前に、テスト用のブラウザ本体を取得します（数百MB。リポジトリの外に保存されます）。
+
+```
+npx playwright install chromium firefox webkit
 ```
 
 ## 構成

@@ -71,7 +71,7 @@
 ### 整形と静的解析
 
 - 整形はPrettier、静的解析はESLintに任せ、手作業で書式を議論しない
-- コミット前に `npm run format:check`、`npm run lint`、`npm run typecheck`、`npm test`、`npm run build` が通ることを確認する
+- コミット前に `npm run format:check`、`npm run lint`、`npm run typecheck`、`npm test`、`npm run build` が通ることを確認する。描画層を変えたときは `npm run test:browser` も確認する
 
 ## 4. Git運用
 

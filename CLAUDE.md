@@ -25,7 +25,8 @@
 | 整形の実行                   | `npm run format`            |
 | Lint                         | `npm run lint`              |
 | 型チェック                   | `npm run typecheck`         |
-| テスト                       | `npm test`                  |
+| 単体テスト                   | `npm test`                  |
+| ブラウザテスト               | `npm run test:browser`      |
 | ビルド                       | `npm run build`             |
 | 開発サーバー                 | `npm run dev -w <アプリ名>` |
 | 依存パッケージの検査         | `npm audit`                 |
