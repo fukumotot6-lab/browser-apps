@@ -192,7 +192,8 @@ body {
   border: 0 solid var(--shadow);
   border-width: 1px 0 0 1px;
   background: var(--surface);
-  font-family: Verdana, Arial, sans-serif;
+  /* 特定の製品のフォントを名指しせず、端末の標準のゴシック体に任せる。 */
+  font-family: sans-serif;
   font-size: 16px;
   font-weight: bold;
   line-height: 1;

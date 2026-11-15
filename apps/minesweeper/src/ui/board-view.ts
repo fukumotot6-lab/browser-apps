@@ -77,7 +77,8 @@ export function createBoardView(): BoardView {
     positions = new WeakMap<EventTarget, Position>();
     element.dataset.width = String(width);
     element.dataset.height = String(height);
-    // 列の数はCSSの変数で渡す。インラインのstyle属性を書かずに済ませるため。
+    // 列の数はCSSの変数で渡す。HTMLにstyle属性を書いたり、難易度ごとのクラスを
+    // 用意したりせずに済ませるため。
     element.style.setProperty('--board-columns', String(width));
 
     const fragment = document.createDocumentFragment();
