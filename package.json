@@ -14,10 +14,12 @@
     "format:check": "prettier --check .",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
+    "test:browser": "npm run test:browser --workspaces --if-present",
     "build": "npm run build --workspaces --if-present"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.65.1",
     "eslint": "^10.15.0",
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.10.1",

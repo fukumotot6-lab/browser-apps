@@ -1,0 +1,253 @@
+/*
+ * 昔のデスクトップ風の、グレーの立体的なパネル。
+ * 立体感は、左上を明るく、右下を暗くした枠線で出す（出っ張り）。逆にするとくぼみになる。
+ */
+
+:root {
+  --surface: #c0c0c0;
+  --light: #ffffff;
+  --shadow: #808080;
+  --page: #4f6273;
+  --cell-size: 24px;
+}
+
+body {
+  margin: 0;
+  background: var(--page);
+  font-family: system-ui, sans-serif;
+}
+
+.page {
+  /* 上級の盤面が画面より広いときに、左端が切れずに横スクロールできるようにする。 */
+  width: max-content;
+  min-width: 100%;
+  box-sizing: border-box;
+  padding: 24px 16px;
+}
+
+#app {
+  width: max-content;
+  margin: 0 auto;
+}
+
+.instructions {
+  margin: 16px auto 0;
+  color: #ffffff;
+  font-size: 14px;
+  text-align: center;
+}
+
+/* 絵の定義は画面に出さない。display: none にすると、参照先の絵が描かれないブラウザがある。 */
+.icon-definitions {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+/* 画面には出さず、スクリーンリーダーには読ませる。display: none では読まれない。 */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.game {
+  /* 通知領域（.visually-hidden）の位置の基準にする。 */
+  position: relative;
+  /* パネルの幅を盤面に合わせる。 */
+  width: max-content;
+  padding: 6px;
+  border: 3px solid;
+  border-color: var(--light) var(--shadow) var(--shadow) var(--light);
+  background: var(--surface);
+  cursor: default;
+  /* 素早いクリックやドラッグで、数字やボタンの文字が選択されないようにする。 */
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.game button {
+  margin: 0;
+  padding: 0;
+  border: 2px solid;
+  border-color: var(--light) var(--shadow) var(--shadow) var(--light);
+  border-radius: 0;
+  background: var(--surface);
+  color: #000000;
+  font: inherit;
+}
+
+.game button:active {
+  border-color: var(--shadow) var(--light) var(--light) var(--shadow);
+}
+
+.game button:focus-visible {
+  outline: 1px dotted #000000;
+  outline-offset: -4px;
+}
+
+.difficulty-bar {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.difficulty-button {
+  flex: 1;
+  min-height: 24px;
+  font-size: 13px;
+}
+
+/* 選択中の難易度は、押し込まれたままの見た目にする。 */
+.game .difficulty-button[aria-pressed='true'] {
+  border-color: var(--shadow) var(--light) var(--light) var(--shadow);
+  background: #d4d4d4;
+  font-weight: bold;
+}
+
+.status-bar {
+  /* 両端の表示器の幅が違っても、顔のボタンが中央に来るようにする。 */
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  margin-bottom: 6px;
+  padding: 4px 5px;
+  border: 2px solid;
+  border-color: var(--shadow) var(--light) var(--light) var(--shadow);
+}
+
+.status-bar > :first-child {
+  justify-self: start;
+}
+
+.status-bar > :last-child {
+  justify-self: end;
+}
+
+.segment-display {
+  display: flex;
+  gap: 1px;
+  padding: 1px;
+  border: 1px solid;
+  border-color: var(--shadow) var(--light) var(--light) var(--shadow);
+  background: #000000;
+}
+
+.segment-digit {
+  display: block;
+  width: 13px;
+  height: 24px;
+}
+
+/* 消灯したセグメントも、うっすら見せる。 */
+.segment {
+  fill: #4a0000;
+}
+
+.segment.is-lit {
+  fill: #ff0000;
+}
+
+.reset-button {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+}
+
+.reset-button .icon {
+  width: 22px;
+  height: 22px;
+}
+
+.icon {
+  display: block;
+  /* クリックの対象を、絵ではなく外側のマスやボタンにそろえる。 */
+  pointer-events: none;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(var(--board-columns), var(--cell-size));
+  grid-auto-rows: var(--cell-size);
+  border: 3px solid;
+  border-color: var(--shadow) var(--light) var(--light) var(--shadow);
+}
+
+/* 開いたマス、明かされた機雷、誤った旗は平らにし、細い境界線で区切る。 */
+.cell {
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: var(--cell-size);
+  height: var(--cell-size);
+  overflow: hidden;
+  border: 0 solid var(--shadow);
+  border-width: 1px 0 0 1px;
+  background: var(--surface);
+  /* 特定の製品のフォントを名指しせず、端末の標準のゴシック体に任せる。 */
+  font-family: sans-serif;
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+/* 閉じたマスと旗のマスは出っ張らせる。 */
+.cell[data-kind='hidden'],
+.cell[data-kind='flag'] {
+  border-width: 3px;
+  border-color: var(--light) var(--shadow) var(--shadow) var(--light);
+}
+
+.cell[data-kind='exploded-mine'] {
+  background: #ff0000;
+}
+
+.cell .icon {
+  width: 16px;
+  height: 16px;
+}
+
+.cell[data-kind='flag'] .icon {
+  width: 14px;
+  height: 14px;
+}
+
+.cell[data-adjacent='1'] {
+  color: #0000ff;
+}
+
+.cell[data-adjacent='2'] {
+  color: #008000;
+}
+
+.cell[data-adjacent='3'] {
+  color: #ff0000;
+}
+
+.cell[data-adjacent='4'] {
+  color: #000080;
+}
+
+.cell[data-adjacent='5'] {
+  color: #800000;
+}
+
+.cell[data-adjacent='6'] {
+  color: #008080;
+}
+
+.cell[data-adjacent='7'] {
+  color: #000000;
+}
+
+.cell[data-adjacent='8'] {
+  color: #808080;
+}

@@ -1,5 +1,7 @@
 dist/
 coverage/
+test-results/
+playwright-report/
 package-lock.json
 
 # 要件定義書の写しは原文のまま保つ
