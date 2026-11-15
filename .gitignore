@@ -4,6 +4,8 @@ node_modules/
 # ビルド成果物・テスト出力
 dist/
 coverage/
+test-results/
+playwright-report/
 *.tsbuildinfo
 
 # 秘密情報（このリポジトリには不要。誤って置いた場合の保険）
