@@ -262,6 +262,17 @@ describe('stepMouse', () => {
         ]),
       ).toEqual(['none', 'none', 'chord', 'flag', 'none']);
     });
+
+    it('盤面の外で左を押したままマスの上で右を押すと、旗にせず、どちらかを離したときに周囲を開く', () => {
+      expect(
+        playRaw([
+          // 左の押下は盤面の外だったので、届いていない。
+          { type: 'press', button: 2, buttons: 3 },
+          { type: 'release', button: 2, buttons: 1 },
+          { type: 'release', button: 0, buttons: 0 },
+        ]),
+      ).toEqual(['none', 'chord', 'none']);
+    });
   });
 
   describe('状態の移り変わり', () => {
